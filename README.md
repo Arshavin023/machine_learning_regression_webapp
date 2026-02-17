@@ -1,8 +1,9 @@
 # Student Math Score Prediction Web App
-![System Architecture](images/ml_architecture.png)
 ![ML Pipeline](https://img.shields.io/badge/Machine_Learning-Regression-blue)
 ![Python](https://img.shields.io/badge/Python-3.8+-yellow)
 ![Flask](https://img.shields.io/badge/Web_App-Flask-lightgrey)
+
+![System Architecture](images/ml_architecture.png)
 
 ## Overview
 A production-grade Machine Learning regression pipeline engineered to predict student mathematical performance. This project transitions from experimental Jupyter Notebooks to a modular Python architecture, featuring automated data ingestion, transformation, and a Flask-based web interface for real-time inference.
