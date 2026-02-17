@@ -63,7 +63,7 @@ Before running this repo, ensure you have the following prerequisites installed:
 
 ### 1. Clone the Repo <a name="Clone the Repo"></a>
 ```bash
-git clone [https://github.com/Arshavin023/machine_learning_regression_webapp.git](https://github.com/Arshavin023/machine_learning_regression_webapp.git)
+git clone https://github.com/Arshavin023/machine_learning_regression_webapp.git
 cd machine_learning_regression_webapp
 ```
 
