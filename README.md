@@ -61,8 +61,6 @@ The **Math Score Prediction** system analyzes demographic and academic factorsâ€
 Before running this repo, ensure you have the following prerequisites installed:
 - Python 3.8+
 
----
-
 ### 1. Clone the Repo <a name="Clone the Repo"></a>
 ```bash
 git clone [https://github.com/Arshavin023/machine_learning_regression_webapp.git](https://github.com/Arshavin023/machine_learning_regression_webapp.git)
@@ -73,6 +71,7 @@ cd machine_learning_regression_webapp
 ```bash
 python3 -m venv ml_venv
 source ml_venv/bin/activate  # On Windows: ml_venv\Scripts\activate
+pip install -e .
 ```
 
 ### 3. Install Python Packages <a name="Install the required Python packages"></a>
