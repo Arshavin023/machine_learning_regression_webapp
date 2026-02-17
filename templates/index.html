@@ -1,1 +1,10 @@
-<h1>Welcome to the homepage</h1>
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="text-center">
+    <h1 class="display-4">Welcome to the Student Performance Indicator</h1>
+    <p class="lead">Predict student math scores based on demographic and academic factors.</p>
+    <hr class="my-4">
+    <a class="btn btn-primary btn-lg" href="/predict" role="button">Start Prediction</a>
+</div>
+{% endblock %}

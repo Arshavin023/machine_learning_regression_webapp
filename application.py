@@ -14,7 +14,7 @@ app=application
 def index():
     return render_template('index.html')
 
-@app.route('/predictdata',methods=['GET','POST'])
+@app.route('/predict',methods=['GET','POST'])
 def predict_datapoint():
     if request.method=='GET':
         return render_template('home.html')
@@ -32,7 +32,7 @@ def predict_datapoint():
         )
 
         pred_df=data.get_data_as_data_frame()
-        print(pred_df)
+        # print(pred_df)
 
         predict_pipeline=PredictPipeline()
         results=predict_pipeline.predict(pred_df)
@@ -41,6 +41,6 @@ def predict_datapoint():
 
 
 if __name__=="__main__":
-    app.run(host="0.0.0.0")
+    app.run(host="0.0.0.0", port=8000)
 
 
