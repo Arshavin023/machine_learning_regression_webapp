@@ -1,5 +1,5 @@
 # Student Math Score Prediction Web App
-![System Architecture](images/architecture.jpg)
+![System Architecture](images/ml_architecture.png)
 ![ML Pipeline](https://img.shields.io/badge/Machine_Learning-Regression-blue)
 ![Python](https://img.shields.io/badge/Python-3.8+-yellow)
 ![Flask](https://img.shields.io/badge/Web_App-Flask-lightgrey)
