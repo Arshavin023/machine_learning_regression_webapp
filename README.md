@@ -5,8 +5,12 @@
 
 ![System Architecture](images/ml_architecture.png)
 
+---
+
 ## Overview
 A production-grade Machine Learning regression pipeline engineered to predict student mathematical performance. This project transitions from experimental Jupyter Notebooks to a modular Python architecture, featuring automated data ingestion, transformation, and a Flask-based web interface for real-time inference.
+
+---
 
 # Table of Contents
 - [Introduction](#introduction)
@@ -17,8 +21,12 @@ A production-grade Machine Learning regression pipeline engineered to predict st
 - [Modular Components](#modular-components)
 - [Authors & Acknowledgements](#authors_and_acknowledgments)
 
+---
+
 ## Introduction <a name="introduction"></a>
 The **Math Score Prediction** system analyzes demographic and academic factors—such as parental education, ethnicity, and test preparation—to provide accurate performance forecasts. It leverages a custom-built pipeline using **Scikit-Learn**, **XGBoost**, and **CatBoost**, ensuring that data preprocessing and model scoring are handled consistently from training to deployment.
+
+---
 
 ## Project Structure <a name="project-structure"></a>
 ```text
@@ -33,6 +41,7 @@ The **Math Score Prediction** system analyzes demographic and academic factors�
 ├── app.py                 # Flask Application Entry Point
 ├── requirements.txt       # Project Dependencies
 └── setup.py               # Package Metadata
+```
 
 ---
 
