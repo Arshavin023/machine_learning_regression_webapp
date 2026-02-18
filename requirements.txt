@@ -7,4 +7,12 @@ catboost
 xgboost
 dill
 flask
+pytest
+pytest-cov
+httpx
+gunicorn
+python-dotenv
+black 
+flake8 
+pre-commit
 # -e .
