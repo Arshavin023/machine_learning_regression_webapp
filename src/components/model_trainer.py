@@ -15,6 +15,7 @@ from xgboost import XGBRegressor
 
 from src.exception import CustomException
 from src.logger import logging
+
 from src.utils import save_object, evaluate_models
 
 
@@ -36,7 +37,6 @@ class ModelTrainer:
                 test_array[:, :-1],
                 test_array[:, -1],
             )
-
             models = {
                 "Decision Tree": DecisionTreeRegressor(),
                 "Random Forest": RandomForestRegressor(),
@@ -49,14 +49,27 @@ class ModelTrainer:
 
             params = {
                 "Decision Tree": {
-                    "criterion": ["squared_error", "friedman_mse", "absolute_error", "poisson"],
+                    "criterion": [
+                        "squared_error",
+                        "friedman_mse",
+                        "absolute_error",
+                        "poisson",
+                    ],
                     "splitter": ["best", "random"],
-                    "max_depth": [3, 5, 10, None],
-                    "min_samples_split": [2, 5, 10],
+                    "max_depth": [3, 5, 10, None],  # Limits how deep the tree grows
+                    "min_samples_split": [
+                        2,
+                        5,
+                        10,
+                    ],  # Min data points required to split a branch
                 },
                 "Random Forest": {
                     "n_estimators": [64, 128, 256, 512],
-                    "max_features": ["sqrt", "log2", None],
+                    "max_features": [
+                        "sqrt",
+                        "log2",
+                        None,
+                    ],  # Limits number of variables per tree
                     "max_depth": [5, 10, 15, None],
                 },
                 "Gradient Boosting": {
@@ -65,12 +78,12 @@ class ModelTrainer:
                     "n_estimators": [64, 128, 256, 512],
                     "max_depth": [3, 5, 8],
                 },
-                "Linear Regression": {},
+                "Linear Regression": {},  # No major hyperparameters to tune here
                 "XGBRegressor": {
                     "learning_rate": [0.1, 0.05, 0.01],
                     "n_estimators": [128, 256, 512],
                     "max_depth": [3, 5, 7],
-                    "lambda": [1, 1.5, 2],
+                    "lambda": [1, 1.5, 2],  # L2 regularization to prevent overfitting
                 },
                 "CatBoosting Regressor": {
                     "depth": [4, 6, 8, 10],
@@ -93,18 +106,22 @@ class ModelTrainer:
                 params=params,
             )
 
+            # To get the best model score from the dict
             best_model_score = max(sorted(model_report.values()))
+
+            # To get best model name
             best_model_name = list(model_report.keys())[
                 list(model_report.values()).index(best_model_score)
             ]
+
             best_model = models[best_model_name]
 
             if best_model_score < 0.6:
                 raise CustomException(
-                    "All models are below 60 percent, no best model found"
+                    "All models are below 60 percent, hence no best model found"
                 )
 
-            logging.info("Best model selected")
+            logging.info("Best model on both training and testing dataset")
 
             save_object(
                 file_path=self.model_trainer_config.trained_model_file_path,
