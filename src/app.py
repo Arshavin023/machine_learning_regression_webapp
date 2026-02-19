@@ -6,12 +6,10 @@ import os
 load_dotenv()
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
-application = Flask(
-    __name__,
-    template_folder=os.path.join(BASE_DIR, "templates")
-)
+application = Flask(__name__, template_folder=os.path.join(BASE_DIR, "templates"))
 
-app = application 
+app = application
+
 # Route for homepage
 @app.route("/")
 def index():
