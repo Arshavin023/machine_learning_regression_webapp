@@ -1,17 +1,22 @@
 import logging
-import os
-from datetime import datetime
-
-LOG_FILE=f"{datetime.now().strftime('%m_%d_%Y_%H_%M_%S')}.log"
-logs_path=os.path.join(os.getcwd(),"logs",LOG_FILE)
-os.makedirs(logs_path,exist_ok=True)
-
-LOG_FILE_PATH=os.path.join(logs_path,LOG_FILE)
-
-logging.basicConfig(
-    filename=LOG_FILE_PATH,
-    format="[ %(asctime)s ] %(lineno)d %(name)s - %(levelname)s - %(message)s",
-    level=logging.INFO,
+import json
+import sys
 
 
-)
+class JsonFormatter(logging.Formatter):
+    def format(self, record):
+        log_record = {
+            "level": record.levelname,
+            "message": record.getMessage(),
+            "time": self.formatTime(record, self.datefmt),
+            "module": record.module,
+        }
+        return json.dumps(log_record)
+
+
+logger = logging.getLogger()
+handler = logging.StreamHandler(sys.stdout)
+handler.setFormatter(JsonFormatter())
+
+logger.addHandler(handler)
+logger.setLevel(logging.INFO)
