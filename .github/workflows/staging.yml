@@ -137,3 +137,5 @@ jobs:
             docker rm staging_app || true
             # Using 8080 to avoid the Nginx conflict we saw earlier
             docker run -d --name staging_app -p 8080:8000 ${{ secrets.DOCKER_USERNAME }}/math-score-prediction:latest
+
+            
