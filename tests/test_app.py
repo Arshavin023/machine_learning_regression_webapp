@@ -1,7 +1,7 @@
 # test_app.py
 
 import pytest
-from src.app import app
+from src.app import application as app
 from unittest.mock import patch
 
 
