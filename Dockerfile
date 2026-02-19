@@ -5,6 +5,7 @@ FROM python:3.10-slim
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 
+# Set working directory
 WORKDIR /app
 
 # Install system dependencies
@@ -12,18 +13,28 @@ RUN apt-get update && apt-get install -y \
     build-essential \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy requirements
+# Copy requirements first (better Docker caching)
 COPY requirements.txt .
 
-# Install dependencies
-RUN pip install --upgrade pip
-RUN pip install -r requirements.txt
+# Upgrade pip and install dependencies
+RUN pip install --upgrade pip && \
+    pip install -r requirements.txt
 
-# Copy project
+# Copy project files
 COPY . .
 
-# Expose port
+# Install your package (IMPORTANT)
+RUN pip install -e .
+
+# 🔐 Create non-root user
+RUN adduser --disabled-password --gecos "" appuser && \
+    chown -R appuser:appuser /app
+
+# Switch to non-root user
+USER appuser
+
 EXPOSE 8000
 
-# Run app using gunicorn (production-ready)
-CMD ["gunicorn", "-b", "0.0.0.0:8000", "app:app"]
+# CMD ["gunicorn", "-b", "0.0.0.0:8000", "src.app:app"]
+CMD ["gunicorn", "-b", "0.0.0.0:8000", "src.app:application"]
+
