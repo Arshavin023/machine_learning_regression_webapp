@@ -55,7 +55,53 @@
 #         run: echo "Staging deployed via Docker ✅"
 
 
-name: Staging Checks
+# name: Staging Checks
+
+# on:
+#   push:
+#     branches:
+#       - staging
+
+# jobs:
+#   staging:
+#     runs-on: ubuntu-latest
+#     steps:
+#       - name: Checkout Repository
+#         uses: actions/checkout@v3
+
+#       - name: Log in to Docker Hub
+#         uses: docker/login-action@v2
+#         with:
+#           username: ${{ secrets.DOCKER_USERNAME }}
+#           password: ${{ secrets.DOCKER_PASSWORD }}
+
+#       - name: Build and Push Docker Image
+#         run: |
+#           # Define the full image name here for consistency
+#           FULL_IMAGE_NAME=${{ secrets.DOCKER_USERNAME }}/math-score-prediction
+#           docker build -t $FULL_IMAGE_NAME:${{ github.run_id }} .
+#           docker tag $FULL_IMAGE_NAME:${{ github.run_id }} $FULL_IMAGE_NAME:latest
+#           docker push $FULL_IMAGE_NAME:latest
+
+#       - name: Deploy to VM via SSH
+#         uses: appleboy/ssh-action@v0.1.10
+#         with:
+#           host: ${{ secrets.STAGING_HOST }}
+#           username: ${{ secrets.STAGING_USER }}
+#           key: ${{ secrets.STAGING_SSH_KEY }}
+#           script: |
+#             FULL_IMAGE_NAME=${{ secrets.DOCKER_USERNAME }}/math-score-prediction
+#             docker pull $FULL_IMAGE_NAME:latest
+#             docker stop staging_app || true
+#             docker rm staging_app || true
+#             # Changed to port 8080 to avoid conflict with Nginx
+#             docker run -d --name staging_app -p 8080:8000 $FULL_IMAGE_NAME:latest
+
+#       - name: Notify Success
+#         run: echo "Staging deployed via Docker ✅"
+
+
+name: Staging Deployment
 
 on:
   push:
@@ -63,39 +109,32 @@ on:
       - staging
 
 jobs:
-  staging:
+  deploy:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Log in to Docker Hub
-        uses: docker/login-action@v2
+        uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
-      - name: Build and Push Docker Image
+      - name: Build and Push
         run: |
-          # Define the full image name here for consistency
-          FULL_IMAGE_NAME=${{ secrets.DOCKER_USERNAME }}/math-score-prediction
-          docker build -t $FULL_IMAGE_NAME:${{ github.run_id }} .
-          docker tag $FULL_IMAGE_NAME:${{ github.run_id }} $FULL_IMAGE_NAME:latest
-          docker push $FULL_IMAGE_NAME:latest
+          docker build -t ${{ secrets.DOCKER_USERNAME }}/math-score-prediction:latest .
+          docker push ${{ secrets.DOCKER_USERNAME }}/math-score-prediction:latest
 
-      - name: Deploy to VM via SSH
-        uses: appleboy/ssh-action@v0.1.10
+      - name: SSH Deploy
+        uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.STAGING_HOST }}
           username: ${{ secrets.STAGING_USER }}
           key: ${{ secrets.STAGING_SSH_KEY }}
           script: |
-            FULL_IMAGE_NAME=${{ secrets.DOCKER_USERNAME }}/math-score-prediction
-            docker pull $FULL_IMAGE_NAME:latest
+            docker pull ${{ secrets.DOCKER_USERNAME }}/math-score-prediction:latest
             docker stop staging_app || true
             docker rm staging_app || true
-            # Changed to port 8080 to avoid conflict with Nginx
-            docker run -d --name staging_app -p 8080:8000 $FULL_IMAGE_NAME:latest
-
-      - name: Notify Success
-        run: echo "Staging deployed via Docker ✅"
+            # Using 8080 to avoid the Nginx conflict we saw earlier
+            docker run -d --name staging_app -p 8080:8000 ${{ secrets.DOCKER_USERNAME }}/math-score-prediction:latest
