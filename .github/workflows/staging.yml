@@ -1,0 +1,61 @@
+name: Staging Checks
+
+# on:
+#   workflow_run:
+#     workflows: ["CI - Test Application"]
+#     types: [completed]
+
+on:
+  push:
+    branches:
+      - staging  # This ensures it only deploys what is actually IN staging
+
+jobs:
+  staging:
+    runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    env:
+      IMAGE_NAME: math-score-prediction
+      # Use the GitHub Run ID as a unique tag for versioning
+      TAG: ${{ github.run_id }}
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      # 1. Build the Docker Image locally in the Runner
+      - name: Build Docker Image
+        run: docker build -t ${{ env.IMAGE_NAME }}:${{ env.TAG }} .
+
+      # 2. Log in to a Registry (Docker Hub or GitHub Packages)
+      # You'll need DOCKER_USERNAME and DOCKER_PASSWORD in GitHub Secrets
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      # 3. Push the Image so the VM can download it
+      - name: Push Image to Registry
+        run: |
+          docker tag ${{ env.IMAGE_NAME }}:${{ env.TAG }} ${{ secrets.DOCKER_USERNAME }}/${{ env.IMAGE_NAME }}:latest
+          docker push ${{ secrets.DOCKER_USERNAME }}/${{ env.IMAGE_NAME }}:latest
+
+      # 4. Deploy to VM using Docker instead of Git Pull
+      - name: Deploy to Staging Server
+        uses: appleboy/ssh-action@v0.1.10
+        with:
+          host: ${{ secrets.STAGING_HOST }}
+          username: ${{ secrets.STAGING_USER }}
+          key: ${{ secrets.STAGING_SSH_KEY }}
+          script: |
+            # Pull the new image
+            docker pull ${{ secrets.DOCKER_USERNAME }}/${{ env.IMAGE_NAME }}:latest
+            # Stop the old container (if it exists)
+            docker stop staging_app || true
+            docker rm staging_app || true
+            # Run the new container
+            docker run -d --name staging_app -p 80:8000 ${{ secrets.DOCKER_USERNAME }}/${{ env.IMAGE_NAME }}:latest
+
+      - name: Notify Success
+        run: echo "Staging deployed via Docker ✅"
