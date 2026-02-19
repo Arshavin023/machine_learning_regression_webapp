@@ -28,7 +28,7 @@ jobs:
           pytest --cov=src --cov-report=term-missing
 
       - name: Create PR to Staging
-        uses: Arshavin023/create-pull-request@v5
+        uses: peter-evans/create-pull-request@v5
         with:
           branch: test
           base: staging
