@@ -5,18 +5,6 @@ on:
     branches:
       - test
 
-# jobs:
-#   test-and-merge:
-#     runs-on: ubuntu-latest
-#     permissions:
-#       contents: write # Needed to push the merge back to GitHub
-
-#     steps:
-#       - name: Checkout Repository
-#         uses: actions/checkout@v4
-#         with:
-#           fetch-depth: 0 # Fetches all history so we can merge
-
 jobs:
   test:
     runs-on: ubuntu-latest
@@ -44,20 +32,20 @@ jobs:
         run: |
           pytest --cov=src --cov-report=term-missing
 
-      - name: Create PR to Staging
-        if: success()
-        uses: peter-evans/create-pull-request@v5
-        with:
-          branch: auto/test-to-staging
-          base: staging
-          title: "Auto-PR: Test passed, ready for Staging"
-          body: "This PR was generated automatically after tests passed on the test branch."
-      
-      # - name: Automatic Merge to Staging
+      # - name: Create PR to Staging
       #   if: success()
-      #   run: |
-      #     git config --global user.name "github-actions[bot]"
-      #     git config --global user.email "github-actions[bot]@users.noreply.github.com"
-      #     git checkout staging
-      #     git merge test --no-ff -m "Auto-merge: Test branch passed CI"
-      #     git push origin staging
+      #   uses: peter-evans/create-pull-request@v5
+      #   with:
+      #     branch: auto/test-to-staging
+      #     base: staging
+      #     title: "Auto-PR: Test passed, ready for Staging"
+      #     body: "This PR was generated automatically after tests passed on the test branch."
+      
+      - name: Automatic Merge to Staging
+        if: success()
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git checkout staging
+          git merge test --no-ff -m "Auto-merge: Test branch passed CI"
+          git push origin staging
