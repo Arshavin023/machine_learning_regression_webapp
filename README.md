@@ -30,15 +30,22 @@ The **Math Score Prediction** system analyzes demographic and academic factors�
 
 ## Project Structure <a name="project-structure"></a>
 ```text
-├── artifacts/             # Serialized models (.pkl) and processed data
-├── notebook/              # Exploratory Data Analysis (EDA) and Model Research
+├── .github/workflows/     # CI/CD Pipelines (Test & Staging)
+├── artifacts/             # Serialized models (.pkl) and split datasets
+├── images/                # Project documentation assets
+├── infra/                 # Infrastructure as Code (Terraform)
+├── notebook/              # EDA and Model Research notebooks
+│   └── data/              # Raw data used during research
 ├── src/                   # Core Source Code
-│   ├── components/        # Data Ingestion, Transformation, & Model Training
-│   ├── pipeline/          # Training and Prediction workflow logic
+│   ├── components/        # Data Ingestion, Transformation, & Training
+│   ├── pipeline/          # Prediction and Training workflows
+│   ├── templates/         # Flask HTML frontend
 │   ├── logger.py          # Custom execution logging
-│   └── exception.py       # Standardized error handling
-├── templates/             # Flask HTML frontend
-├── app.py                 # Flask Application Entry Point
+│   ├── exception.py       # Standardized error handling
+│   ├── utils.py           # Helper functions (e.g., model saving/loading)
+│   └── app.py             # Flask Application Entry Point
+├── tests/                 # Unit and Integration tests
+├── Dockerfile             # Containerization configuration
 ├── requirements.txt       # Project Dependencies
 └── setup.py               # Package Metadata
 ```

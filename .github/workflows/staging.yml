@@ -1,61 +1,101 @@
-name: Staging Checks
-
+# name: Staging Checks
 # on:
-#   workflow_run:
-#     workflows: ["CI - Test Application"]
-#     types: [completed]
+#   push:
+#     branches:
+#       - staging  # This ensures it only deploys what is actually IN staging
+
+# jobs:
+#   staging:
+#     runs-on: ubuntu-latest
+#     # if: ${{ github.event.workflow_run.conclusion == 'success' }}
+#     env:
+#       IMAGE_NAME: math-score-prediction
+#       # Use the GitHub Run ID as a unique tag for versioning
+#       TAG: ${{ github.run_id }}
+
+#     steps:
+#       - name: Checkout Repository
+#         uses: actions/checkout@v3
+
+#       # 1. Build the Docker Image locally in the Runner
+#       - name: Build Docker Image
+#         run: docker build -t ${{ env.IMAGE_NAME }}:${{ env.TAG }} .
+
+#       # 2. Log in to a Registry (Docker Hub or GitHub Packages)
+#       # You'll need DOCKER_USERNAME and DOCKER_PASSWORD in GitHub Secrets
+#       - name: Log in to Docker Hub
+#         uses: docker/login-action@v2
+#         with:
+#           username: ${{ secrets.DOCKER_USERNAME }}
+#           password: ${{ secrets.DOCKER_PASSWORD }}
+
+#       # 3. Push the Image so the VM can download it
+#       - name: Push Image to Registry
+#         run: |
+#           docker tag ${{ env.IMAGE_NAME }}:${{ env.TAG }} ${{ secrets.DOCKER_USERNAME }}/${{ env.IMAGE_NAME }}:latest
+#           docker push ${{ secrets.DOCKER_USERNAME }}/${{ env.IMAGE_NAME }}:latest
+
+#       # 4. Deploy to VM using Docker instead of Git Pull
+#       - name: Deploy to Staging Server
+#         uses: appleboy/ssh-action@v0.1.10
+#         with:
+#           host: ${{ secrets.STAGING_HOST }}
+#           username: ${{ secrets.STAGING_USER }}
+#           key: ${{ secrets.STAGING_SSH_KEY }}
+#           script: |
+#             # Pull the new image
+#             docker pull ${{ secrets.DOCKER_USERNAME }}/${{ env.IMAGE_NAME }}:latest
+#             # Stop the old container (if it exists)
+#             docker stop staging_app || true
+#             docker rm staging_app || true
+#             # Run the new container
+#             docker run -d --name staging_app -p 80:8000 ${{ secrets.DOCKER_USERNAME }}/${{ env.IMAGE_NAME }}:latest
+
+#       - name: Notify Success
+#         run: echo "Staging deployed via Docker ✅"
+
+
+name: Staging Checks
 
 on:
   push:
     branches:
-      - staging  # This ensures it only deploys what is actually IN staging
+      - staging
 
 jobs:
   staging:
     runs-on: ubuntu-latest
-    if: ${{ github.event.workflow_run.conclusion == 'success' }}
-    env:
-      IMAGE_NAME: math-score-prediction
-      # Use the GitHub Run ID as a unique tag for versioning
-      TAG: ${{ github.run_id }}
-
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v3
 
-      # 1. Build the Docker Image locally in the Runner
-      - name: Build Docker Image
-        run: docker build -t ${{ env.IMAGE_NAME }}:${{ env.TAG }} .
-
-      # 2. Log in to a Registry (Docker Hub or GitHub Packages)
-      # You'll need DOCKER_USERNAME and DOCKER_PASSWORD in GitHub Secrets
       - name: Log in to Docker Hub
         uses: docker/login-action@v2
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
-      # 3. Push the Image so the VM can download it
-      - name: Push Image to Registry
+      - name: Build and Push Docker Image
         run: |
-          docker tag ${{ env.IMAGE_NAME }}:${{ env.TAG }} ${{ secrets.DOCKER_USERNAME }}/${{ env.IMAGE_NAME }}:latest
-          docker push ${{ secrets.DOCKER_USERNAME }}/${{ env.IMAGE_NAME }}:latest
+          # Define the full image name here for consistency
+          FULL_IMAGE_NAME=${{ secrets.DOCKER_USERNAME }}/math-score-prediction
+          docker build -t $FULL_IMAGE_NAME:${{ github.run_id }} .
+          docker tag $FULL_IMAGE_NAME:${{ github.run_id }} $FULL_IMAGE_NAME:latest
+          docker push $FULL_IMAGE_NAME:latest
 
-      # 4. Deploy to VM using Docker instead of Git Pull
-      - name: Deploy to Staging Server
+      - name: Deploy to VM via SSH
         uses: appleboy/ssh-action@v0.1.10
         with:
           host: ${{ secrets.STAGING_HOST }}
           username: ${{ secrets.STAGING_USER }}
           key: ${{ secrets.STAGING_SSH_KEY }}
           script: |
-            # Pull the new image
-            docker pull ${{ secrets.DOCKER_USERNAME }}/${{ env.IMAGE_NAME }}:latest
-            # Stop the old container (if it exists)
+            FULL_IMAGE_NAME=${{ secrets.DOCKER_USERNAME }}/math-score-prediction
+            docker pull $FULL_IMAGE_NAME:latest
             docker stop staging_app || true
             docker rm staging_app || true
-            # Run the new container
-            docker run -d --name staging_app -p 80:8000 ${{ secrets.DOCKER_USERNAME }}/${{ env.IMAGE_NAME }}:latest
+            # Changed to port 8080 to avoid conflict with Nginx
+            docker run -d --name staging_app -p 8080:8000 $FULL_IMAGE_NAME:latest
 
       - name: Notify Success
         run: echo "Staging deployed via Docker ✅"
