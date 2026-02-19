@@ -75,4 +75,7 @@ jobs:
             docker stop staging_app || true
             docker rm staging_app || true
             # Using 8080 to avoid the Nginx conflict
-            docker run -d --name staging_app -p 8080:8000 ${{ secrets.DOCKER_USERNAME }}/math-score-prediction:latest
+            docker run -d --name staging_app -p 1759:8000 ${{ secrets.DOCKER_USERNAME }}/math-score-prediction:latest
+            # CLEANUP: Remove unused images, stopped containers, and dangling networks
+            # This keeps your server disk from filling up over time
+            docker system prune -f
