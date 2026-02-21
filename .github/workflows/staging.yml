@@ -33,8 +33,14 @@ jobs:
           script_stop: true
           script: |
             docker pull ${{ secrets.DOCKER_USERNAME }}/math-score-prediction:latest
-            docker stop math-score-prediction || true
-            docker rm math-score-prediction || true
+
+            # 2. Check and Remove existing container (Clean Idempotency)
+            if [ "$(docker ps -aq -f name=math-score-prediction)" ]; then
+                echo "Stopping and removing existing container..."
+                docker stop math-score-prediction
+                docker rm math-score-prediction
+            fi
+
             # Using 8080 to avoid the Nginx conflict
             docker run -d --name math-score-prediction -p 1759:8000 ${{ secrets.DOCKER_USERNAME }}/math-score-prediction:latest
             # CLEANUP: Remove unused images, stopped containers, and dangling networks
